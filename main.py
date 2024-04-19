@@ -16,22 +16,27 @@ class Graph:
         self.matrix[u][v] = 1
         self.edges.append((u, v))
 
+    def successors(self, vertex):
+        return [i for i in range(self.vertices) if self.matrix[vertex][i] == 1]
+
     def show_matrix(self):
         print('Macierz sąsiedzstwa: ')
         for row in self.matrix:
             print(*row)
 
-    def successors(self, vertex):
-        return [i for i in range(self.vertices) if self.matrix[vertex][i] == 1]
+    def show_edges(self):
+        print('Lista krawedzi: ')
+        for u, v in self.edges:
+            print(u + 1, '->', v + 1)
 
-    def print_successors(self):
+    def show_successors(self):
         print('Lista następników: ')
         for i in range(self.vertices):
             print(f'Wierzchołek: {i}: {self.successors(i)}')
 
     def dfs_matrix(self):  # przeszukiwanie w glab
         visited = [False] * self.vertices
-
+        print('Przeszukiwanie DFS na macierzy sasiedztwa:', end=' ')
         def def_recursion(vertex):
             visited[vertex] = True
             print(vertex, end=' ')
@@ -46,9 +51,9 @@ class Graph:
                 def_recursion(i)
         print()
 
-    def bfs_matrix(self): # przeszukiwanie wszerz
+    def bfs_matrix(self):  # przeszukiwanie wszerz
         visited = [False] * self.vertices
-        print('Przeszukiwanie wszerz: ', end='')
+        print('Przeszukiwanie BFS na macierzy sasiedztwa:', end=' ')
         for start in range(self.vertices):
             if not visited[start]:
                 queue = deque([start])
@@ -64,7 +69,7 @@ class Graph:
 
     def dfs_edges(self):  # Przeszukiwanie w głąb
         visited = [False] * self.vertices
-
+        print('Przeszukiwanie DFS na lisicie krawedzi:', end=' ')
         def dfs_recursion(vertex):
             visited[vertex] = True
             print(vertex, end=' ')
@@ -81,8 +86,7 @@ class Graph:
 
     def bfs_edges(self):  # Przeszukiwanie wszerz
         visited = [False] * self.vertices
-
-        print('Przeszukiwanie wszerz:', end=' ')
+        print('Przeszukiwanie BFS na lisicie krawedzi:', end=' ')
         for start in range(self.vertices):
             if not visited[start]:
                 queue = deque([start])
@@ -95,6 +99,41 @@ class Graph:
                             queue.append(v)
                             visited[v] = True
         print()
+
+    def bfs_successors(self):
+        print('Przeszukanie grafu BFS na liscie nastepnikow: ')
+        visited = [False] * self.vertices
+
+        for start in range(self.vertices):
+            if not visited[start]:
+                queue = deque([start])
+                visited[start] = True
+
+                while queue:
+                    vertex = queue.popleft()
+                    print(vertex, end=' ')
+                    for neighbour in self.successors(vertex):
+                        if not visited[neighbour]:
+                            queue.append(neighbour)
+                            visited[neighbour] = True
+        print()
+
+    def dfs_successors(self):
+        print('Przeglądanie grafu DFS na liscie następników: ')
+        visited = [False] * self.vertices
+        def dfs_recursion(vertex, visited):
+            visited[vertex] = True
+            print(vertex, end=' ')
+
+            for neighbour in self.successors(vertex):
+                if not visited[neighbour]:
+                    dfs_recursion(neighbour, visited)
+
+        for start in range(self.vertices):
+            if not visited[start]:
+                dfs_recursion(start, visited)
+        print()
+
 
 def create_graph():
     n = int(input('Podaj liczbę wierzchołków: '))
@@ -109,7 +148,7 @@ def create_graph():
 
 
 def generate_graph(saturation, n):  # generowanie grafu acyklicznego
-    list_len = int(n*(n-1)/2)
+    list_len = int(n * (n - 1) / 2)
     num_ones = int(list_len * saturation)
     num_zeros = list_len - num_ones
     random_ones = [1] * num_ones + [0] * num_zeros
@@ -118,7 +157,7 @@ def generate_graph(saturation, n):  # generowanie grafu acyklicznego
     index = 0
     matrix = [[0] * n for i in range(n)]
     for i in range(n):
-        for j in range(i+1, n):
+        for j in range(i + 1, n):
             matrix[i][j] = random_ones[index]
             index += 1
     g = Graph(n)
@@ -134,26 +173,45 @@ def generate_graph(saturation, n):  # generowanie grafu acyklicznego
 # graph.print_successors()
 # graph.dfs()
 
-graph = generate_graph(0.5, 1000)
+graph = generate_graph(0.5, 10)
 
+graph.show_matrix()
+graph.show_edges()
+graph.show_successors()
+# PRZESZUKIWANIE BFS
 timer = time()
 graph.bfs_matrix()
 timer = time() - timer
 print(f"Czas BFS dla macierzy sasiedztwa {timer}")
+print()
 
 timer = time()
 graph.bfs_edges()
 timer = time() - timer
 print(f"Czas BFS dla listy krawedzi {timer}")
+print()
 
+timer = time()
+graph.bfs_successors()
+timer = time() - timer
+print(f"Czas BFS dla listy nastepnikow {timer}")
+print()
+
+# PRZESZUKIWANIE DFS
 timer = time()
 graph.dfs_matrix()
 timer = time() - timer
 print(f"Czas DFS dla macierzy sasiedztwa {timer}")
+print()
 
 timer = time()
 graph.dfs_edges()
 timer = time() - timer
 print(f"Czas DFS dla listy krawedzi {timer}")
+print()
 
-
+timer = time()
+graph.dfs_successors()
+timer = time() - timer
+print(f"Czas DFS dla listy nastepnikow {timer}")
+print()
